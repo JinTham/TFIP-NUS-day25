@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import tfiip.paf.day25.Models.Book;
+import tfiip.paf.day25.Exception.BookException;
 import tfiip.paf.day25.Models.Reservation;
 import tfiip.paf.day25.Models.ReservationDetails;
 import tfiip.paf.day25.Repositories.BookRepository;
@@ -30,11 +30,12 @@ public class ReservationService {
     ReservationDetailsRepository reservationDetailsRepo;
 
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public Boolean reserveBooks(List<Book> bookList, String borrower) {
+    public Boolean reserveBooks(List<Integer> bookIdList, String borrower) {
         // check for book availability by quantity
-        for (Book book : bookList) {
-            if (book.getQuantity()<1){
-                return false;
+        for (Integer bookId : bookIdList) {
+            if (bookRepo.findById(bookId).getQuantity()<1){
+                throw new BookException("%s is not available".formatted(bookRepo.findById(bookId).getTitle()));
+                //return false;
             }
         }
 
@@ -45,10 +46,10 @@ public class ReservationService {
         Integer reservationId = reservationRepo.create(reservation); //create a Reservation object and return its reservation id
 
         // minus book quantity and create the reservation details records for each book
-        for (Book book : bookList) {
-            bookRepo.update(book.getId());
+        for (Integer bookId : bookIdList) {
+            bookRepo.update(bookId);
             ReservationDetails reservationDetails = new ReservationDetails();
-            reservationDetails.setBookId(book.getId());
+            reservationDetails.setBookId(bookId);
             reservationDetails.setReservationId(reservationId);
             reservationDetailsRepo.create(reservationDetails);
         }

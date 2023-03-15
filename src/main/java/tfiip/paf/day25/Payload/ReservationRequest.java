@@ -2,20 +2,18 @@ package tfiip.paf.day25.Payload;
 
 import java.util.List;
 
-import tfiip.paf.day25.Models.Book;
-
 public class ReservationRequest {
-    private List<Book> books;
+    private List<Integer> bookIdList;
     private String borrower;
 
     public ReservationRequest() {
     }
 
-    public List<Book> getBooks() {
-        return books;
+    public List<Integer> getBookIdList() {
+        return bookIdList;
     }
-    public void setBooks(List<Book> books) {
-        this.books = books;
+    public void setBooks(List<Integer> bookIdList) {
+        this.bookIdList = bookIdList;
     }
     public String getBorrower() {
         return borrower;

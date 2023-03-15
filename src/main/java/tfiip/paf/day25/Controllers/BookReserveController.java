@@ -20,7 +20,7 @@ public class BookReserveController {
 
     @PostMapping
     public ResponseEntity<Boolean> reserveBooks(@RequestBody ReservationRequest rq) {
-        Boolean reserved = reservationSvc.reserveBooks(rq.getBooks(),rq.getBorrower());
+        Boolean reserved = reservationSvc.reserveBooks(rq.getBookIdList(),rq.getBorrower());
         if (reserved) {
             return new ResponseEntity<Boolean>(reserved, HttpStatus.OK);
         } else {
