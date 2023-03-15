@@ -1,5 +1,7 @@
 package tfiip.paf.day25.Services;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import tfiip.paf.day25.Models.Book;
 import tfiip.paf.day25.Models.Reservation;
 import tfiip.paf.day25.Models.ReservationDetails;
 import tfiip.paf.day25.Repositories.BookRepository;
@@ -27,29 +30,29 @@ public class ReservationService {
     ReservationDetailsRepository reservationDetailsRepo;
 
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRED)
-    public Boolean reserveBooks(List<Integer> bookList, Reservation reservation) {
-        Boolean reservationCompleted = false;
+    public Boolean reserveBooks(List<Book> bookList, String borrower) {
         // check for book availability by quantity
-        Boolean allBooksAvailable = true;
-        for (Integer bookId : bookList) {
-            if (bookRepo.findById(bookId).getQuantity()<1){
-                allBooksAvailable = false;
+        for (Book book : bookList) {
+            if (book.getQuantity()<1){
+                return false;
             }
         }
-        // if books available, minus book quantity
-        if (allBooksAvailable) {
-            for (Integer id : bookList) {
-                bookRepo.update(id);
-            }
-        }
+
         // create reservation record
-        reservationRepo.create(reservation);
+        Reservation reservation = new Reservation();
+        reservation.setFullName(borrower);
+        reservation.setReservationDate(Date.valueOf(LocalDate.now()));
+        Integer reservationId = reservationRepo.create(reservation); //create a Reservation object and return its reservation id
 
-        // create the reservation details records
-        ReservationDetails reservationDetails = new ReservationDetails(null, null, null);
-        reservationDetailsRepo.create(reservationDetails);
-
-        return reservationCompleted;
+        // minus book quantity and create the reservation details records for each book
+        for (Book book : bookList) {
+            bookRepo.update(book.getId());
+            ReservationDetails reservationDetails = new ReservationDetails();
+            reservationDetails.setBookId(book.getId());
+            reservationDetails.setReservationId(reservationId);
+            reservationDetailsRepo.create(reservationDetails);
+        }
+        return true;
     }
 
 }

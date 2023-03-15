@@ -22,7 +22,7 @@ public class ReservationRepository {
     JdbcTemplate jdbcTemplate;
 
     private final String SQL_SELECT = "select * from reservation";
-    private final String SQL_INSERT = "insert to reservation (reservation_date, full_name) values (?,?)";
+    private final String SQL_INSERT = "insert into reservation (reservation_date, full_name) values (?,?)";
 
     public List<Reservation> findAll() {
         return jdbcTemplate.query(SQL_SELECT,BeanPropertyRowMapper.newInstance(Reservation.class));
